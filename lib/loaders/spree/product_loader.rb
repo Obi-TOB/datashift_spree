@@ -305,6 +305,9 @@ module DataShift
             end
           end
 
+          # TOB: The object needs to be saved here, otherwise variants are not saved!
+          @load_object.save!
+
           @load_object.reload unless @load_object.new_record?
           #puts "DEBUG Load Object now has Variants : #{@load_object.variants.inspect}" if(verbose)
         end
