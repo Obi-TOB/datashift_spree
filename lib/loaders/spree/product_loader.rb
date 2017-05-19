@@ -110,6 +110,12 @@ module DataShift
 
               if(@load_object.variants.size == values.size)
                 @load_object.variants.each_with_index {|v, i| v.price = values[i].to_f }
+
+                # TOB variant prices (nested associations) are not saved by @load_object.save therefore we save every variant again
+                @load_object.variants.each do |var|
+                  var.save
+                end
+
                 @load_object.save
               else
                 puts "WARNING: Price entries did not match number of Variants - None Set"
