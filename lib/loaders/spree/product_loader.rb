@@ -43,7 +43,7 @@ module DataShift
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         
         # Non Product/database fields we can still process
-        @we_can_process_these_anyway =  ["images","variant_sku","variant_cost_price","variant_price","variant_images","stock_items"]
+        @we_can_process_these_anyway =  ["images","variant_sku","variant_cost_price","variant_price","variant_images","stock_items", "part_skus"]
           
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
@@ -85,6 +85,20 @@ module DataShift
 
           add_taxons
 
+        elsif(current_method_detail.operator?('suppliers') && current_value)
+
+          save_if_new
+          supplier_id = Spree::Supplier.find_by(name: "gasido GmbH").id
+          @load_object.add_suppliers!(supplier_id)
+
+        elsif(current_method_detail.operator?('part_skus') && current_value)
+          part_skus = current_value.split('|')
+          part_skus.each do |part_sku|
+            assembly_id = @load_object.variants.first.id
+            part_id = Spree::Variant.find_by(sku: part_sku)
+            form = Spree::AssignPartToBundleForm.new(@load_object, {count: 1, part_id: part_id, assembly_id: assembly_id})
+            form.submit
+          end
         elsif(current_method_detail.operator?('product_properties') )
 
           add_properties
