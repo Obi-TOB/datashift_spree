@@ -88,8 +88,12 @@ module DataShift
         elsif(current_method_detail.operator?('suppliers') && current_value)
 
           save_if_new
-          supplier_id = Spree::Supplier.find_by(name: "gasido GmbH").id
-          @load_object.add_suppliers!(supplier_id)
+          suppliers = current_value.split('|')
+          suppliers.each do |supplier|
+            supplier_name = supplier.split(':').second
+            supplier_id = Spree::Supplier.find_by(name: supplier_name).id
+            @load_object.add_suppliers!(supplier_id)
+          end
 
         elsif(current_method_detail.operator?('part_skus') && current_value)
           part_skus = current_value.split('|')
