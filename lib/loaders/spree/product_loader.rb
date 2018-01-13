@@ -98,7 +98,8 @@ module DataShift
         elsif(current_method_detail.operator?('part_skus') && current_value)
           part_skus = current_value.split('|')
           part_skus.each do |part_sku|
-            assembly_id = @load_object.variants.first.id
+            # if no variants are present take master variant
+            assembly_id = @load_object.variants.present? ? @load_object.variants.first.id : @load_object.master.id
             part_id = Spree::Variant.find_by(sku: part_sku)
             form = Spree::AssignPartToBundleForm.new(@load_object, {count: 1, part_id: part_id, assembly_id: assembly_id})
             form.submit
