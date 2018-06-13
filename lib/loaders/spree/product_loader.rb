@@ -96,13 +96,19 @@ module DataShift
           end
 
         elsif(current_method_detail.operator?('part_skus') && current_value)
-          part_skus = current_value.split('|')
-          part_skus.each do |part_sku|
-            # if no variants are present take master variant
-            assembly_id = @load_object.variants.present? ? @load_object.variants.first.id : @load_object.master.id
-            part_id = Spree::Variant.find_by(sku: part_sku)
-            form = Spree::AssignPartToBundleForm.new(@load_object, {count: 1, part_id: part_id, assembly_id: assembly_id})
-            form.submit
+          # use | to denote different variants
+          # use ; to seperate different parts per variant
+          variants = @load_object.variants_including_master
+          variants_skus = current_value.split('|')
+          variants_skus.each_with_index do |variant_skus, i|
+            part_skus = variant_skus.split(';')
+            part_skus.each do |part_sku|
+              # if no variants are present take master variant
+              assembly_id = variants[i].id
+              part_id = Spree::Variant.find_by(sku: part_sku)
+              form = Spree::AssignPartToBundleForm.new(@load_object, {count: 1, part_id: part_id, assembly_id: assembly_id})
+              form.submit
+            end
           end
         elsif(current_method_detail.operator?('product_properties') )
 
